@@ -32,9 +32,17 @@ task service { status, desiredState, containerSpec, slot } =
 
                 Nothing ->
                     ""
+        imageLabel =
+            case List.head (String.split "@" containerSpec.image) of
+                Just s ->
+                    "[" ++ s ++ "]"
+                Nothing ->
+                    ""
     in
         li [ classList classes ]
             [ text (service.name ++ slotLabel slot)
+            , br [] []
+            , text imageLabel
             , br [] []
             , text (statusString status.state desiredState)
             ]
