@@ -3,7 +3,7 @@ module Components exposing (..)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 import Util exposing (..)
 import Docker.Types exposing (..)
 import Components.Networks as Networks
@@ -18,7 +18,7 @@ statusString state desiredState =
         state ++ " → " ++ desiredState
 
 
-task : Service -> AssignedTask -> Html msg
+task : Service -> AssignedTask -> Html Msg
 task service { status, desiredState, containerSpec, slot } =
     let
         classes =
@@ -41,7 +41,7 @@ task service { status, desiredState, containerSpec, slot } =
                 _  ->
                     { name = "", sha = "" }
     in
-        li [ classList classes ]
+        li [ classList classes, onClick (ShowImageDialog (Just containerSpec)) ]
             [ text (service.name ++ slotLabel slot)
             , br [] []
             , span [ title imageLabel.sha ] [ text ("[" ++ imageLabel.name ++ "]") ]
@@ -50,7 +50,7 @@ task service { status, desiredState, containerSpec, slot } =
             ]
 
 
-serviceNode : Service -> TaskIndex -> Node -> Html msg
+serviceNode : Service -> TaskIndex -> Node -> Html Msg
 serviceNode service taskAllocations node =
     let
         tasks =
@@ -60,7 +60,7 @@ serviceNode service taskAllocations node =
             [ ul [] (List.map (task service) tasks) ]
 
 
-serviceRow : List Node -> TaskIndex -> Networks.Connections -> Service -> Html msg
+serviceRow : List Node -> TaskIndex -> Networks.Connections -> Service -> Html Msg
 serviceRow nodes taskAllocations networkConnections service =
     tr []
         (th [] [ text service.name ] :: (Networks.connections service networkConnections) :: (List.map (serviceNode service taskAllocations) nodes))

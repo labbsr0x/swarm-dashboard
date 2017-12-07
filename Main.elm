@@ -10,6 +10,8 @@ import Docker exposing (fromJson)
 import Components as UI
 import Messages exposing (Msg(..))
 import UrlParser exposing (..)
+import Dialog exposing (view)
+import Debug exposing (log)
 
 
 localWebsocket : Navigation.Location -> String
@@ -26,6 +28,7 @@ type alias Model =
     , tasks : TaskIndex
     , errors : List String
     , pageFilter : String
+    , showImage: Maybe ContainerSpec
     }
 
 
@@ -52,6 +55,7 @@ init location =
           , tasks = Dict.empty
           , errors = []
           , pageFilter = pageFilter
+          , showImage = Nothing
           }
         , Cmd.none
         )
@@ -72,6 +76,10 @@ update msg model =
             ( model, Cmd.none )
         PageFilter pageFilter ->
             ( { model | pageFilter = pageFilter }, Cmd.none )
+        ShowImageDialog image ->
+            ( { model | showImage = image }, Cmd.none )
+        AcknowledgeImageDialog ->
+            ( { model | showImage = Nothing }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -80,7 +88,7 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view { swarm, tasks, errors, pageFilter } =
+view { swarm, tasks, errors, pageFilter, showImage } =
     let
         { services, nodes, networks } =
             swarm
@@ -88,6 +96,18 @@ view { swarm, tasks, errors, pageFilter } =
         div []
             [ UI.swarmGrid services nodes networks tasks pageFilter
             , ul [] (List.map (\e -> li [] [ text e ]) errors)
+            , bootstrap, Dialog.view
+              (case showImage of
+                Just a ->
+                    Just { closeMessage = Just AcknowledgeImageDialog
+                         , containerClass = Nothing
+                         , header = Just (text "Image details")
+                         , body = Just (p [] [text (toString a)])
+                         , footer = Nothing
+                         }
+                Nothing ->
+                  Nothing
+              )
             ]
 
 

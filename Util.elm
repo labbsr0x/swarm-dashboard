@@ -2,6 +2,8 @@ module Util exposing (..)
 
 import Dict exposing (Dict)
 import Set exposing (Set)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 complement : (a -> Bool) -> a -> Bool
@@ -61,3 +63,11 @@ indexedFoldl indexedReducer init list =
             ( idx + 1, indexedReducer idx item accumulator )
     in
         list |> (List.foldl reducer ( 0, init ) >> Tuple.second)
+
+bootstrap : Html msg
+bootstrap =
+    node "link"
+      [ href "/bootstrap.min.css"
+      , rel "stylesheet"
+      ]
+      []
